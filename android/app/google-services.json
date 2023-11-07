@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "453654191866",
+    "project_id": "all-skin-for-minecraft",
+    "storage_bucket": "all-skin-for-minecraft.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453654191866:android:b59d9a46b8ae369de83343",
+        "android_client_info": {
+          "package_name": "com.example.all_skin_for_minecraft"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAu1UImFrNW_KGaa5f5cIJQXS-KFEPqKn8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
