@@ -10,7 +10,7 @@ class AppOpenAdManager {
   /// Load an AppOpenAd.
   void loadAd() {
     AppOpenAd.load(
-      adUnitId: minecraftData.value["minecraft-appOpen"],
+      adUnitId: "ca-app-pub-3940256099942544/3419835294",
       orientation: AppOpenAd.orientationPortrait,
       request: const AdManagerAdRequest(),
       adLoadCallback: AppOpenAdLoadCallback(
@@ -21,7 +21,7 @@ class AppOpenAdManager {
           isLoaded = true;
         },
         onAdFailedToLoad: (error) {
-          print("Ad Loaded.................................");
+          print("error Ad Loaded.................................");
           // Handle the error.
         },
       ),

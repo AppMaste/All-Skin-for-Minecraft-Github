@@ -34,7 +34,8 @@ AppOpenAd? appOpenAd;
 
 loadAd() {
   AppOpenAd.load(
-    adUnitId: minecraftData.value["minecraft-appOpen"],
+    adUnitId: "ca-app-pub-3940256099942544/3419835294",
+    // adUnitId: minecraftData.value["minecraft-appOpen"],
     orientation: AppOpenAd.orientationPortrait,
     request: const AdManagerAdRequest(),
     adLoadCallback: AppOpenAdLoadCallback(
