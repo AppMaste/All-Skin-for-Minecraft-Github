@@ -312,7 +312,7 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                         // width: double.maxFinite,
                         decoration: BoxDecoration(
                           borderRadius:
-                          BorderRadius.circular(ScreenSize.fSize_15()),
+                              BorderRadius.circular(ScreenSize.fSize_15()),
                           border: GradientBoxBorder(
                             gradient: LinearGradient(
                                 begin: Alignment.topCenter,
@@ -336,7 +336,8 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                                 vertical: ScreenSize.fSize_10(),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   GradientText(
                                     gradientDirection: GradientDirection.ttb,
@@ -345,7 +346,7 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                                         fontSize: ScreenSize.fSize_20(),
                                         fontWeight: FontWeight.w600),
                                     colors:
-                                    colorUtilsController.exitAlertBoxColor,
+                                        colorUtilsController.exitAlertBoxColor,
                                   ),
                                   GestureDetector(
                                     onTap: () {
@@ -379,7 +380,7 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                                 onTap: () async {
                                   Get.back();
                                   toastNotification();
-                                  save("${argument[2]}");
+                                  saveMineCraft("${argument[2]}");
                                 },
                                 child: Container(
                                   height: ScreenSize.horizontalBlockSize! * 14,
@@ -422,7 +423,7 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                                 onTap: () {
                                   Get.back();
                                   toastNotification();
-                                  save("${argument[1]}");
+                                  saveGallery("${argument[1]}");
                                 },
                                 child: Container(
                                   height: ScreenSize.horizontalBlockSize! * 14,
@@ -480,12 +481,23 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
     );
   }
 
-  save(String image) async {
+  saveGallery(String image) async {
     // await _askPermission();
     var response = await Dio()
         .get(image, options: Options(responseType: ResponseType.bytes));
     final result =
         await ImageGallerySaver.saveImage(Uint8List.fromList(response.data));
+    print(result);
+    // Navigator.pop(context);
+  }
+
+  saveMineCraft(String image) async {
+    // await _askPermission();
+    var response = await Dio()
+        .get(image, options: Options(responseType: ResponseType.bytes));
+    final result = await ImageGallerySaver.saveImage(
+      Uint8List.fromList(response.data),
+    );
     print(result);
     // Navigator.pop(context);
   }

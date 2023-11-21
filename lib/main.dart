@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:all_skin_for_minecraft/demo.dart';
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/home%20screen.dart';
 import 'package:all_skin_for_minecraft/src/screen/splash%20screens/splash%20screen.dart';
 import 'package:all_skin_for_minecraft/src/service/notification%20service.dart';
@@ -29,13 +30,11 @@ Future initConfig() async {
   configDataController.Data();
 }
 
-
 AppOpenAd? appOpenAd;
 
 loadAd() {
   AppOpenAd.load(
-    adUnitId: "ca-app-pub-3940256099942544/3419835294",
-    // adUnitId: minecraftData.value["minecraft-appOpen"],
+    adUnitId: minecraftData.value["minecraft-AppOpen"],
     orientation: AppOpenAd.orientationPortrait,
     request: const AdManagerAdRequest(),
     adLoadCallback: AppOpenAdLoadCallback(
@@ -46,7 +45,7 @@ loadAd() {
       },
       onAdFailedToLoad: (error) {
         AppOpenAd.load(
-          adUnitId: minecraftData.value["minecraft-appOpen"],
+          adUnitId: minecraftData.value["minecraft-AppOpen"],
           orientation: AppOpenAd.orientationPortrait,
           request: const AdManagerAdRequest(),
           adLoadCallback: AppOpenAdLoadCallback(
@@ -74,10 +73,11 @@ Future<void> main() async {
   MobileAds.instance.initialize();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(
-      (message) => firebasemessgingBackgroundMessagingHandler(message));
+          (message) => firebasemessgingBackgroundMessagingHandler(message));
+  // FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
+      AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
@@ -99,3 +99,11 @@ Future<void> main() async {
     ),
   );
 }
+
+// void main() {
+//   return runApp(
+//     const GetMaterialApp(
+//       home: MyHomePage(),
+//     ),
+//   );
+// }

@@ -91,7 +91,7 @@ class ConfigData extends GetxController with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
       AppOpenAd.load(
-        adUnitId: "ca-app-pub-3940256099942544/3419835294",
+        adUnitId: minecraftData.value["minecraft-AppOpen"],
         orientation: AppOpenAd.orientationPortrait,
         request: const AdManagerAdRequest(),
         adLoadCallback: AppOpenAdLoadCallback(

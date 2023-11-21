@@ -193,19 +193,21 @@ class AppBarController extends GetxController {
               context,
               imageUtilController.drawerAllSkinsImage,
               "All Skins",
-              () {
-                Get.back();
-                home = true;
-              },
+              home,
+              // () {
+              //   Get.back();
+              //   home = true;
+              // },
             ),
             drawerController.drawerRow(
               context,
               imageUtilController.likeImage,
               "Favorite Skins",
-              () {
-                Get.back();
-                like = true;
-              },
+              like,
+              // () {
+              //   Get.back();
+              //   like = true;
+              // },
             ),
             drawerController.drawerRow(
               context,

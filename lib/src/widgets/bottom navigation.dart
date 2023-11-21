@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:all_skin_for_minecraft/src/utilities/color.dart';
 import 'package:all_skin_for_minecraft/src/utilities/image.dart';
@@ -89,24 +90,6 @@ class HomeContainer {
   var height = ScreenSize.fSize_40();
   var width = ScreenSize.horizontalBlockSize! * 22.8;
 
-
-
-
-  fetchUser() async {
-    print("fetchUser called");
-    var uri =
-        "http://owlsup.ru/posts?category=skins&page=1&lang=en&sort=downloads&order=desc&apiKey=37b51d194a7513e45b56f6524f2d51f2";
-    final url = Uri.parse(uri);
-    final response = await http.get(url);
-    final body = response.body;
-    final json = jsonDecode(body);
-    // setState(() {
-    users.value = json['skins'];
-    print("fetchUser complete $users");
-    // });
-  }
-
-
   home(BuildContext context) {
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
@@ -119,21 +102,18 @@ class HomeContainer {
                 horizontal: ScreenSize.fSize_12(),
                 vertical: ScreenSize.fSize_20()),
             child: Obx(
-                  () => Container(
+              () => Container(
                 height: height,
                 width: ScreenSize.horizontalBlockSize! * 92,
                 decoration: BoxDecoration(
                     color: Colors.green,
                     gradient: LinearGradient(
-                      colors:
-                      colorUtilsController.appBarColor,
+                      colors: colorUtilsController.appBarColor,
                     ),
-                    borderRadius: BorderRadius.circular(
-                        ScreenSize.fSize_10()),
+                    borderRadius: BorderRadius.circular(ScreenSize.fSize_10()),
                     border: GradientBoxBorder(
                         gradient: LinearGradient(
-                            colors: colorUtilsController
-                                .exitAlertBoxColor))),
+                            colors: colorUtilsController.exitAlertBoxColor))),
                 child: Row(
                   children: [
                     GestureDetector(
@@ -148,22 +128,19 @@ class HomeContainer {
                         width: width,
                         decoration: BoxDecoration(
                           borderRadius:
-                          BorderRadius.circular(
-                              ScreenSize.fSize_8()),
+                              BorderRadius.circular(ScreenSize.fSize_8()),
                           color: trending.value == true
                               ? Colors.red
                               : Colors.transparent,
                           gradient: LinearGradient(
-                            colors: colorUtilsController
-                                .exitAlertBoxColor,
+                            colors: colorUtilsController.exitAlertBoxColor,
                           ),
                         ),
                         child: Center(
                           child: Text(
                             "Trending",
                             style: GoogleFonts.chakraPetch(
-                                color:
-                                trending.value == true
+                                color: trending.value == true
                                     ? Colors.white
                                     : Colors.grey),
                           ),
@@ -182,14 +159,12 @@ class HomeContainer {
                         width: width,
                         decoration: BoxDecoration(
                           borderRadius:
-                          BorderRadius.circular(
-                              ScreenSize.fSize_8()),
+                              BorderRadius.circular(ScreenSize.fSize_8()),
                           color: latest.value == true
                               ? Colors.red
                               : Colors.transparent,
                           gradient: LinearGradient(
-                            colors: colorUtilsController
-                                .exitAlertBoxColor,
+                            colors: colorUtilsController.exitAlertBoxColor,
                           ),
                         ),
                         child: Center(
@@ -215,14 +190,12 @@ class HomeContainer {
                         width: width,
                         decoration: BoxDecoration(
                           borderRadius:
-                          BorderRadius.circular(
-                              ScreenSize.fSize_8()),
+                              BorderRadius.circular(ScreenSize.fSize_8()),
                           color: NEW.value == true
                               ? Colors.red
                               : Colors.transparent,
                           gradient: LinearGradient(
-                            colors: colorUtilsController
-                                .exitAlertBoxColor,
+                            colors: colorUtilsController.exitAlertBoxColor,
                           ),
                         ),
                         child: Center(
@@ -248,22 +221,19 @@ class HomeContainer {
                         width: width,
                         decoration: BoxDecoration(
                           borderRadius:
-                          BorderRadius.circular(
-                              ScreenSize.fSize_8()),
+                              BorderRadius.circular(ScreenSize.fSize_8()),
                           color: mostUsed.value == true
                               ? Colors.red
                               : Colors.transparent,
                           gradient: LinearGradient(
-                            colors: colorUtilsController
-                                .exitAlertBoxColor,
+                            colors: colorUtilsController.exitAlertBoxColor,
                           ),
                         ),
                         child: Center(
                           child: Text(
                             "Most Used",
                             style: GoogleFonts.chakraPetch(
-                                color:
-                                mostUsed.value == true
+                                color: mostUsed.value == true
                                     ? Colors.white
                                     : Colors.grey),
                           ),
@@ -276,161 +246,134 @@ class HomeContainer {
             ),
           ),
           Padding(
-            padding:
-            EdgeInsets.only(top: ScreenSize.fSize_50()),
+            padding: EdgeInsets.only(top: ScreenSize.fSize_50()),
             child: Container(
               height: ScreenSize.horizontalBlockSize! * 140,
               color: Colors.transparent,
               child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Obx(
-                        () => users.value.isEmpty
-                        ? const Center(
-                        child:
-                        CircularProgressIndicator())
+                    () => error.value.isEmpty
+                        ? const Center(child: CircularProgressIndicator())
                         : GridView.builder(
-                      gridDelegate:
-                      SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        childAspectRatio:
-                        (itemWidth / itemHeight),
-                        // childAspectRatio: 20 / 10,
-                        mainAxisSpacing:
-                        ScreenSize.fSize_15(),
-                        crossAxisSpacing:
-                        ScreenSize.fSize_10(),
-                      ),
-                      itemCount: users.value.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            Get.to(
-                                  () =>
-                                  SkinDetailsScreen(),
-                              arguments: [
-                                users[index]['title'],
-                                "http://owlsup.ru/main_catalog/skins/${users[index]['id']}/skinIMG.png",
-                                "http://owlsup.ru/main_catalog/skins/${users[index]['id']}/skin.png"
-                              ],
-                            );
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient:
-                              LinearGradient(
-                                colors:
-                                colorUtilsController
-                                    .appBarColor,
-                              ),
-                              borderRadius:
-                              BorderRadius.circular(
-                                  ScreenSize
-                                      .fSize_8()),
-                              border:
-                              GradientBoxBorder(
-                                gradient: LinearGradient(
-                                    colors: colorUtilsController
-                                        .exitAlertBoxColor),
-                              ),
+                      controller: scrollController.value,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                              childAspectRatio: (itemWidth / itemHeight),
+                              // childAspectRatio: 20 / 10,
+                              mainAxisSpacing: ScreenSize.fSize_15(),
+                              crossAxisSpacing: ScreenSize.fSize_10(),
                             ),
-                            child: Stack(
-                              children: [
-                                Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: ScreenSize
-                                            .fSize_10()),
-                                    child:
-                                    Image.network(
-                                      "http://owlsup.ru/main_catalog/skins/${users[index]['id']}/skinIMG.png",
-                                      scale: 1.8,
-                                    ),
-                                  ),
-                                ),
-                                Align(
-                                  alignment: Alignment
-                                      .bottomCenter,
+                            itemCount: dataList.value.length +
+                                (isLoading.value ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              if (index == dataList.value.length) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              } else {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Get.to(
+                                      () => SkinDetailsScreen(),
+                                      arguments: [
+                                        users[index]['title'],
+                                        "http://owlsup.ru/main_catalog/skins/${users[index]['id']}/skinIMG.png",
+                                        "http://owlsup.ru/main_catalog/skins/${users[index]['id']}/skin.png"
+                                      ],
+                                    );
+                                  },
                                   child: Container(
-                                    height: ScreenSize
-                                        .fSize_34(),
-                                    decoration:
-                                    BoxDecoration(
-                                      gradient:
-                                      LinearGradient(
-                                        colors: colorUtilsController
-                                            .gridviewContainerColor,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors:
+                                            colorUtilsController.appBarColor,
                                       ),
-                                      borderRadius: BorderRadius.only(
-                                          bottomLeft:
-                                          Radius.circular(
-                                              ScreenSize.horizontalBlockSize! *
-                                                  2),
-                                          bottomRight:
-                                          Radius.circular(ScreenSize.horizontalBlockSize! *
-                                              2)),
+                                      borderRadius: BorderRadius.circular(
+                                          ScreenSize.fSize_8()),
+                                      border: GradientBoxBorder(
+                                        gradient: LinearGradient(
+                                            colors: colorUtilsController
+                                                .exitAlertBoxColor),
+                                      ),
                                     ),
-                                    child: Center(
-                                      child: Text(
-                                        users[index]
-                                        ['title'],
-                                        style: GoogleFonts.chakraPetch(
-                                            color: Colors
-                                                .white,
-                                            fontSize:
-                                            ScreenSize
-                                                .fSize_14()),
-                                      ),
+                                    child: Stack(
+                                      children: [
+                                        Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                                bottom: ScreenSize.fSize_10()),
+                                            child: Image.network(
+                                              "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skinIMG.png",
+                                              scale: 1.8,
+                                            ),
+                                          ),
+                                        ),
+                                        Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Container(
+                                            height: ScreenSize.fSize_34(),
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                colors: colorUtilsController
+                                                    .gridviewContainerColor,
+                                              ),
+                                              borderRadius: BorderRadius.only(
+                                                  bottomLeft: Radius.circular(
+                                                      ScreenSize
+                                                              .horizontalBlockSize! *
+                                                          2),
+                                                  bottomRight: Radius.circular(
+                                                      ScreenSize
+                                                              .horizontalBlockSize! *
+                                                          2)),
+                                            ),
+                                            child: Center(
+                                              child: Text(
+                                                dataList.value[index]['title'],
+                                                style: GoogleFonts.chakraPetch(
+                                                    color: Colors.white,
+                                                    fontSize:
+                                                        ScreenSize.fSize_14()),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Align(
+                                            alignment: Alignment.topRight,
+                                            child: Container(
+                                              height: ScreenSize.fSize_25(),
+                                              width: ScreenSize.fSize_25(),
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                gradient: LinearGradient(
+                                                  colors: colorUtilsController
+                                                      .gridviewContainerColor,
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                ),
+                                              ),
+                                              child: GestureDetector(
+                                                onTap: () {},
+                                                child: Icon(
+                                                  Icons.favorite_rounded,
+                                                  size: ScreenSize.fSize_20(),
+                                                  color: colorUtilsController
+                                                      .likeColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ),
-                                Padding(
-                                  padding:
-                                  const EdgeInsets
-                                      .all(8.0),
-                                  child: Align(
-                                    alignment:
-                                    Alignment
-                                        .topRight,
-                                    child: Container(
-                                      height: ScreenSize
-                                          .fSize_25(),
-                                      width: ScreenSize
-                                          .fSize_25(),
-                                      decoration:
-                                      BoxDecoration(
-                                        shape: BoxShape
-                                            .circle,
-                                        gradient:
-                                        LinearGradient(
-                                          colors: colorUtilsController
-                                              .gridviewContainerColor,
-                                          begin: Alignment
-                                              .topCenter,
-                                          end: Alignment
-                                              .bottomCenter,
-                                        ),
-                                      ),
-                                      child:
-                                      GestureDetector(
-                                        onTap: () {},
-                                        child: Icon(
-                                          Icons
-                                              .favorite_rounded,
-                                          size: ScreenSize
-                                              .fSize_20(),
-                                          color: colorUtilsController
-                                              .likeColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                                );
+                              }
+                            },
                           ),
-                        );
-                      },
-                    ),
                   )),
             ),
           ),
@@ -438,5 +381,4 @@ class HomeContainer {
       ),
     );
   }
-
 }
