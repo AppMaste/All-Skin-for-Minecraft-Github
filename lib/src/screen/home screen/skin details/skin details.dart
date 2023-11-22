@@ -4,19 +4,15 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'dart:ui' as ui;
-import 'package:all_skin_for_minecraft/src/widgets/appbar.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:all_skin_for_minecraft/src/widgets/data.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
-import 'package:path_provider/path_provider.dart';
 import '../../../utilities/color.dart';
 import '../../../utilities/image.dart';
 import '../../../widgets/size.dart';
@@ -33,7 +29,7 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
 
   double rotation = 0.0;
 
-  File? downloadedFile;
+  // File? downloadedFile;
 
   String downloadMessage = "Press download";
 
@@ -62,7 +58,7 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    width: ScreenSize.fSize_250(),
+                    width: ScreenSize.horizontalBlockSize! * 75,
                     color: Colors.transparent,
                     child: Row(
                       children: [
@@ -84,13 +80,17 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                         ),
                         Padding(
                           padding: EdgeInsets.only(top: ScreenSize.fSize_20()),
-                          child: Text(
-                            argument[0],
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.chakraPetch(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                fontSize: ScreenSize.fSize_20()),
+                          child: Container(
+                            color: Colors.transparent,
+                            width: ScreenSize.horizontalBlockSize! * 60,
+                            child: Text(
+                              argument[0],
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.chakraPetch(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: ScreenSize.fSize_20()),
+                            ),
                           ),
                         ),
                       ],
@@ -143,6 +143,18 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                             child: Image.network(
                               argument[1],
                               scale: 0.24,
+                              errorBuilder: (context, object,
+                                  stacktrace) {
+                                debugPrint(
+                                    "object : ${object.toString()}");
+                                debugPrint(
+                                    "stacktrace : ${stacktrace.toString()}");
+                                return Icon(
+                                  Icons.error,
+                                  size: ScreenSize.fSize_30(),
+                                  color: Colors.red,
+                                );
+                              },
                               // fit: BoxFit.cover,
                             ),
                           ),
@@ -380,7 +392,10 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                                 onTap: () async {
                                   Get.back();
                                   toastNotification();
-                                  saveMineCraft("${argument[2]}");
+                                  print("IMAGEEEEEEEE ${argument[2]}");
+                                  String imagePath = argument[2];
+                                  // await saveGalleryImageAsPNG(imagePath);
+                                  await saveNetworkImageAsPNG(imagePath);
                                 },
                                 child: Container(
                                   height: ScreenSize.horizontalBlockSize! * 14,
@@ -500,5 +515,29 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
     );
     print(result);
     // Navigator.pop(context);
+  }
+
+  Future<void> saveGalleryImageAsPNG(String imagePath) async {
+    File imageFile = File.fromUri(Uri.parse(imagePath));
+    Uint8List bytes = await imageFile.readAsBytes();
+    ui.Image image = await decodeImageFromList(bytes);
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    Uint8List pngBytes = byteData!.buffer.asUint8List();
+    await ImageGallerySaver.saveImage(Uint8List.fromList(pngBytes));
+    print("IMAGE SAVED");
+  }
+
+  Future<void> saveNetworkImageAsPNG(String imageUrl) async {
+    http.Response response = await http.get(Uri.parse(imageUrl));
+    if (response.statusCode == 200) {
+      Uint8List bytes = response.bodyBytes;
+      ui.Image image = await decodeImageFromList(bytes);
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+      await ImageGallerySaver.saveImage(Uint8List.fromList(pngBytes));
+    } else {
+      print('Failed to fetch the image. Status code: ${response.statusCode}');
+    }
   }
 }

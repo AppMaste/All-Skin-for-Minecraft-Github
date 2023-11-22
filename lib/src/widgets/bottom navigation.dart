@@ -81,7 +81,7 @@ class BottomNavigation extends GetxController {
   }
 }
 
-class HomeContainer {
+/*class HomeContainer {
   var trending = true.obs;
   var latest = false.obs;
   var NEW = false.obs;
@@ -381,4 +381,4 @@ class HomeContainer {
       ),
     );
   }
-}
+}*/
