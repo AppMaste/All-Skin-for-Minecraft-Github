@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, invalid_use_of_protected_member
 
 import 'dart:io';
 import 'dart:typed_data';
@@ -16,6 +16,7 @@ import 'package:simple_gradient_text/simple_gradient_text.dart';
 import '../../../utilities/color.dart';
 import '../../../utilities/image.dart';
 import '../../../widgets/size.dart';
+import '../home screen.dart';
 
 class SkinDetailsScreen extends StatefulWidget {
   const SkinDetailsScreen({super.key});
@@ -35,7 +36,7 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("ARGUMENT $argument");
+    print("ARGUMENT ${argument[0].toString().isNum}");
     return Scaffold(
       backgroundColor: Colors.black,
       // appBar: AppBar(
@@ -143,10 +144,8 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                             child: Image.network(
                               argument[1],
                               scale: 0.24,
-                              errorBuilder: (context, object,
-                                  stacktrace) {
-                                debugPrint(
-                                    "object : ${object.toString()}");
+                              errorBuilder: (context, object, stacktrace) {
+                                debugPrint("object : ${object.toString()}");
                                 debugPrint(
                                     "stacktrace : ${stacktrace.toString()}");
                                 return Icon(
@@ -280,20 +279,41 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
                               scale: 2.5,
                             ),
                           ),
-                          Container(
-                            height: ScreenSize.fSize_40(),
-                            width: ScreenSize.fSize_40(),
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors:
-                                      colorUtilsController.drawerContainerColor,
-                                )),
-                            child: Image.asset(
-                              imageUtilController.likeImage,
-                              scale: 2.5,
+                          Obx(
+                            () => GestureDetector(
+                              onTap: () {
+                                print(
+                                    "likeTitleData.value.contains(argument[0] ${likeTitleData.value.contains(argument[0])}");
+                                if (likeIDData.value.contains(argument[3]) ||
+                                    likeTitleData.value.contains(argument[0])) {
+                                  likeIDData.remove(argument[0]);
+                                  likeTitleData.remove(argument[0]);
+                                } else {
+                                  likeIDData.value.addAll([argument[3]]);
+                                  likeTitleData.value.addAll([argument[0]]);
+                                }
+                                likeIDData.refresh();
+                                likeTitleData.refresh();
+                              },
+                              child: Container(
+                                height: ScreenSize.fSize_40(),
+                                width: ScreenSize.fSize_40(),
+                                decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: colorUtilsController
+                                          .drawerContainerColor,
+                                    )),
+                                child: Icon(
+                                  (likeTitleData.value.contains(argument[0]))
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border,
+                                  size: ScreenSize.fSize_30(),
+                                  color: colorUtilsController.likeColor,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -517,15 +537,15 @@ class _SkinDetailsScreenState extends State<SkinDetailsScreen> {
     // Navigator.pop(context);
   }
 
-  Future<void> saveGalleryImageAsPNG(String imagePath) async {
-    File imageFile = File.fromUri(Uri.parse(imagePath));
-    Uint8List bytes = await imageFile.readAsBytes();
-    ui.Image image = await decodeImageFromList(bytes);
-    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List pngBytes = byteData!.buffer.asUint8List();
-    await ImageGallerySaver.saveImage(Uint8List.fromList(pngBytes));
-    print("IMAGE SAVED");
-  }
+  // Future<void> saveGalleryImageAsPNG(String imagePath) async {
+  //   File imageFile = File.fromUri(Uri.parse(imagePath));
+  //   Uint8List bytes = await imageFile.readAsBytes();
+  //   ui.Image image = await decodeImageFromList(bytes);
+  //   ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+  //   Uint8List pngBytes = byteData!.buffer.asUint8List();
+  //   await ImageGallerySaver.saveImage(Uint8List.fromList(pngBytes));
+  //   print("IMAGE SAVED");
+  // }
 
   Future<void> saveNetworkImageAsPNG(String imageUrl) async {
     http.Response response = await http.get(Uri.parse(imageUrl));

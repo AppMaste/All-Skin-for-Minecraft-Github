@@ -213,10 +213,11 @@ class AppBarController extends GetxController {
               context,
               imageUtilController.guideImage,
               "Guide",
-              () {
-                Get.back();
-                guide = true;
-              },
+              guide,
+              // () {
+              //   Get.back();
+              //   guide = true;
+              // },
             ),
             drawerController.drawerRow(
               context,

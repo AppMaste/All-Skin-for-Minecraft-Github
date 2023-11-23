@@ -24,8 +24,9 @@ import '../../widgets/data.dart';
 import '../../widgets/size.dart';
 import 'favorite screen.dart';
 
-var showLikeTitleData;
-var showLikeIDData = [].obs;
+var likeTitleData = [].obs;
+var likeIDData = [].obs;
+
 
 var dataList = [].obs;
 var isLoading = false.obs;
@@ -42,9 +43,7 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   var home = true.obs;
-
   var like = false.obs;
-
   var guide = false.obs;
 
   var trending = true.obs;
@@ -460,8 +459,6 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  var likeTitleData = [].obs;
-  var likeIDData = [].obs;
 
   saveLikeData() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
@@ -526,22 +523,26 @@ class HomeScreenState extends State<HomeScreen> {
             Get.back();
             setState(() {
               home.value = true;
+              like.value = false;
+              guide.value = false;
             });
           },
           () {
             Get.back();
             setState(() {
               like.value = true;
+              home.value = false;
+              guide.value = false;
             });
           },
           () {
             Get.back();
             setState(() {
               guide.value = true;
+              like.value = false;
+              home.value = false;
             });
           },
-          // like.value,
-          // guide.value,
         ),
         body: Obx(
           () => SingleChildScrollView(
@@ -738,9 +739,6 @@ class HomeScreenState extends State<HomeScreen> {
                                         ),
                                         controller: scrollController,
                                         itemCount:
-                                            // dataList.length == 5
-                                            //     ? squares.length
-                                            //     :
                                             latestData.value.length +
                                                 (isLoading ? 1 : 0),
                                         itemBuilder:
@@ -761,7 +759,9 @@ class HomeScreenState extends State<HomeScreen> {
                                                     latestData.value[index]
                                                         ['title'],
                                                     "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skinIMG.png",
-                                                    "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skin.png"
+                                                    "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skin.png",
+                                                    latestData.value[index]
+                                                    ['id'],
                                                   ],
                                                 );
                                               },
@@ -878,25 +878,54 @@ class HomeScreenState extends State<HomeScreen> {
                                                           child:
                                                               GestureDetector(
                                                             onTap: () {
+                                                              if (likeIDData
+                                                                  .value
+                                                                  .contains(
+                                                                  latestData.value[index]
+                                                                  [
+                                                                  'id'])) {
+                                                                likeIDData
+                                                                    .removeAt(
+                                                                    index);
+                                                                likeTitleData
+                                                                    .removeAt(
+                                                                    index);
+                                                              } else {
+                                                                likeTitleData
+                                                                    .value
+                                                                    .addAll([
+                                                                  latestData.value[
+                                                                  index]
+                                                                  [
+                                                                  'title']
+                                                                ]);
+                                                                likeIDData
+                                                                    .addAll([
+                                                                  latestData.value[
+                                                                  index]
+                                                                  ['id']
+                                                                ]);
+                                                                // pref.setStringList("like", [likeTitleData.string]);
+
+                                                              }
+                                                              // saveLikeData();
                                                               likeTitleData
                                                                   .refresh();
-                                                              likeTitleData
-                                                                  .addAll(
-                                                                [
-                                                                  latestData.value[
-                                                                          index]
-                                                                      ['id'],
-                                                                ],
-                                                              );
+                                                              likeIDData
+                                                                  .refresh();
                                                             },
                                                             child: Icon(
-                                                              Icons
-                                                                  .favorite_rounded,
+                                                              (likeTitleData
+                                                                  .value
+                                                                  .contains(latestData.value[index][
+                                                              'title']))
+                                                                  ? Icons
+                                                                  .favorite_rounded
+                                                                  :  Icons.favorite_border,
                                                               size: ScreenSize
                                                                   .fSize_20(),
-                                                              color:
-                                                                  colorUtilsController
-                                                                      .likeColor,
+                                                              color: colorUtilsController
+                                                                  .likeColor,
                                                             ),
                                                           ),
                                                         ),
@@ -945,7 +974,9 @@ class HomeScreenState extends State<HomeScreen> {
                                                         newData.value[index]
                                                             ['title'],
                                                         "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skinIMG.png",
-                                                        "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skin.png"
+                                                        "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skin.png",
+                                                        newData.value[index]
+                                                        ['id'],
                                                       ],
                                                     );
                                                   },
@@ -1065,10 +1096,51 @@ class HomeScreenState extends State<HomeScreen> {
                                                               ),
                                                               child:
                                                                   GestureDetector(
-                                                                onTap: () {},
-                                                                child: Icon(
-                                                                  Icons
-                                                                      .favorite_rounded,
+                                                                onTap: () {
+                                                                  if (likeIDData
+                                                                      .value
+                                                                      .contains(
+                                                                      newData.value[index]
+                                                                      [
+                                                                      'id'])) {
+                                                                    likeIDData
+                                                                        .removeAt(
+                                                                        index);
+                                                                    likeTitleData
+                                                                        .removeAt(
+                                                                        index);
+                                                                  } else {
+                                                                    likeTitleData
+                                                                        .value
+                                                                        .addAll([
+                                                                      newData.value[
+                                                                      index]
+                                                                      [
+                                                                      'title']
+                                                                    ]);
+                                                                    likeIDData
+                                                                        .addAll([
+                                                                      newData.value[
+                                                                      index]
+                                                                      ['id']
+                                                                    ]);
+                                                                    // pref.setStringList("like", [likeTitleData.string]);
+
+                                                                  }
+                                                                  // saveLikeData();
+                                                                  likeTitleData
+                                                                      .refresh();
+                                                                  likeIDData
+                                                                      .refresh();
+                                                                },
+                                                                child:Icon(
+                                                                  (likeTitleData
+                                                                      .value
+                                                                      .contains(newData.value[index][
+                                                                  'title']))
+                                                                      ? Icons
+                                                                      .favorite_rounded
+                                                                      :  Icons.favorite_border,
                                                                   size: ScreenSize
                                                                       .fSize_20(),
                                                                   color: colorUtilsController
@@ -1120,7 +1192,9 @@ class HomeScreenState extends State<HomeScreen> {
                                                         dataList.value[index]
                                                             ['title'],
                                                         "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skinIMG.png",
-                                                        "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skin.png"
+                                                        "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skin.png",
+                                                        dataList.value[index]
+                                                        ['id'],
                                                       ],
                                                     );
                                                   },
@@ -1273,7 +1347,6 @@ class HomeScreenState extends State<HomeScreen> {
                                                                     pref.setStringList("like", [likeTitleData.string]);
 
                                                                   }
-
                                                                   // saveLikeData();
                                                                   likeTitleData
                                                                       .refresh();
