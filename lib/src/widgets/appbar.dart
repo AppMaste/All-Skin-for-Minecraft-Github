@@ -13,64 +13,151 @@ import '../utilities/image.dart';
 AppBarController appBarController = Get.put(AppBarController());
 
 class AppBarController extends GetxController {
-  appbar() {
-    return Container(
-      height: ScreenSize.fSize_100(),
-      width: double.maxFinite,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: colorUtilsController.appBarColor,
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: ScreenSize.fSize_10()),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: ScreenSize.fSize_150(),
-              color: Colors.transparent,
+  var search = false.obs;
+  var editingController = TextEditingController().obs;
+  appbar(BuildContext context,var likeList,var mainList) {
+    void filterSearchResults(String query) {
+      // setState(() {
+      likeList = mainList
+            .where((item) => item.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      // });
+    }
+    return search.value
+        ? Container(
+            height: ScreenSize.fSize_100(),
+            width: double.maxFinite,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: colorUtilsController.appBarColor,
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                  top: ScreenSize.fSize_15(), left: ScreenSize.fSize_15()),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: EdgeInsets.only(
-                        top: ScreenSize.fSize_20(),
-                        right: ScreenSize.fSize_20()),
-                    child: Builder(builder: (context) {
-                      return GestureDetector(
-                        onTap: () => Scaffold.of(context).openDrawer(),
-                        child: Image.asset(
-                          imageUtilController.drawerIcon,
-                          scale: 2.0,
+                  Container(
+                    width: ScreenSize.horizontalBlockSize! * 65,
+                    height: ScreenSize.fSize_50(),
+                    color: Colors.transparent,
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            search.value = false;
+                          },
+                          child: Image.asset(
+                            imageUtilController.leftArrowImage,
+                            scale: 2.0,
+                          ),
                         ),
-                      );
-                    }),
+                        SizedBox(width: ScreenSize.fSize_10()),
+                        Flexible(
+                          child: TextFormField(
+                            controller: editingController.value,
+                            onChanged: (value) {
+                              filterSearchResults(value);
+                            },
+                            style: GoogleFonts.chakraPetch(
+                              color: Colors.white,
+                              fontSize: ScreenSize.fSize_20(),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: "Search here",
+                              hintStyle: GoogleFonts.chakraPetch(
+                                color: Colors.white,
+                                fontSize: ScreenSize.fSize_20(),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   Padding(
                     padding: EdgeInsets.only(top: ScreenSize.fSize_20()),
-                    child: Text(
-                      "ALL SKIN",
-                      style: GoogleFonts.chakraPetch(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: ScreenSize.fSize_20()),
+                    child: GestureDetector(
+                      onTap: () {
+                        // search.value = !search.value;
+                      },
+                      child: Image.asset(
+                        imageUtilController.searchImage,
+                        scale: 2.0,
+                      ),
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.only(top: ScreenSize.fSize_20()),
-              child: Image.asset(
-                imageUtilController.searchImage,
-                scale: 2.0,
+          )
+        : Container(
+            height: ScreenSize.fSize_100(),
+            width: double.maxFinite,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: colorUtilsController.appBarColor,
               ),
-            )
-          ],
-        ),
-      ),
-    );
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: ScreenSize.fSize_10()),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: ScreenSize.fSize_150(),
+                    color: Colors.transparent,
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                              top: ScreenSize.fSize_20(),
+                              right: ScreenSize.fSize_20()),
+                          child: Builder(builder: (context) {
+                            return GestureDetector(
+                              onTap: () => Scaffold.of(context).openDrawer(),
+                              child: Image.asset(
+                                imageUtilController.drawerIcon,
+                                scale: 2.0,
+                              ),
+                            );
+                          }),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: ScreenSize.fSize_20()),
+                          child: Text(
+                            "ALL SKIN",
+                            style: GoogleFonts.chakraPetch(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: ScreenSize.fSize_20()),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: ScreenSize.fSize_20()),
+                    child: GestureDetector(
+                      onTap: () {
+                        search.value = true;
+                      },
+                      child: Image.asset(
+                        imageUtilController.searchImage,
+                        scale: 2.0,
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          );
   }
 
   appbar2() {

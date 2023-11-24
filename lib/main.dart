@@ -1,9 +1,8 @@
 // ignore_for_file: non_constant_identifier_names, invalid_use_of_protected_member
 
 import 'dart:convert';
-
-import 'package:all_skin_for_minecraft/demo.dart';
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/home%20screen.dart';
+import 'package:all_skin_for_minecraft/src/screen/home%20screen/skin%20details/skin%20details.dart';
 import 'package:all_skin_for_minecraft/src/screen/splash%20screens/splash%20screen.dart';
 import 'package:all_skin_for_minecraft/src/service/notification%20service.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -68,16 +67,16 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
   tz.initializeTimeZones();
   NotificationService().initNotification();
-  MobileAds.instance.initialize();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(
-          (message) => firebasemessgingBackgroundMessagingHandler(message));
+      (message) => firebasemessgingBackgroundMessagingHandler(message));
   // FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
-      AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin>()
       ?.createNotificationChannel(channel);
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
@@ -93,8 +92,9 @@ Future<void> main() async {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {
-        '/': (context) =>  SplashScreen(),
-        '/HomeScreen': (context) =>   HomeScreen(),
+        '/': (context) => SplashScreen(),
+        '/HomeScreen': (context) => const HomeScreen(),
+        '/SkinDetailsScreen': (context) => const SkinDetailsScreen(),
       },
     ),
   );

@@ -5,7 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
-import '../../main.dart';
+
+
 
 class NotificationService {
   static final NotificationService _notificationService =
@@ -35,18 +36,18 @@ class NotificationService {
 
     const InitializationSettings initializationSettings =
     InitializationSettings(
-        android: initializationSettingsAndroid,);
+      android: initializationSettingsAndroid,);
     // the initialization settings are initialized after they are setted
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  Future showNotification(int id, String title, String body) async {
+  Future showNotification(int id, String title, String body,int time) async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       id,
       title,
       body,
       tz.TZDateTime.now(tz.local).add(
-        Duration(minutes: minecraftData.value["minecraft-messageTime"]),
+         Duration(hours: time),
       ),
       const NotificationDetails(
         // Android details
@@ -72,5 +73,3 @@ Future<void> firebasemessgingBackgroundMessagingHandler(
   await Firebase.initializeApp();
   print("A bg message just showed up : ${message.messageId}");
 }
-
-

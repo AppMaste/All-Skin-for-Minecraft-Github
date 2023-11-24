@@ -3,15 +3,20 @@
 import 'dart:convert';
 
 import 'package:all_skin_for_minecraft/main.dart';
+import 'package:all_skin_for_minecraft/src/screen/splash%20screens/splash%20screen.dart';
 import 'package:all_skin_for_minecraft/src/service/appopen%20ad.dart';
 import 'package:all_skin_for_minecraft/src/service/notification%20service.dart';
 import 'package:facebook_audience_network/facebook_audience_network.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+import '../home screen.dart';
 
 ConfigData configDataController = Get.put(ConfigData());
 
@@ -23,7 +28,7 @@ class ConfigData extends GetxController with WidgetsBindingObserver {
   @override
   void onInit() {
     // TODO: implement onInit
-    FacebookAudienceNetwork.init();
+    // FacebookAudienceNetwork.init();
     super.onInit();
     tz.initializeTimeZones();
     NotificationService().initNotification();
@@ -66,21 +71,23 @@ class ConfigData extends GetxController with WidgetsBindingObserver {
     if (minecraftData.value.isNotEmpty) {
       // loadAd();
       Future.delayed(const Duration(seconds: 3), () async {
-        NotificationService().showNotification(
-            1,
-            minecraftData.value['minecraft-messageTitle'],
-            minecraftData.value['minecraft-messageBody']);
-        // NotificationService();
-        Get.offAndToNamed("/HomeScreen");
+        Get.offAll(() => HomeScreen());
       });
     } else {
-      // initConfig().whenComplete(() {});
-      minecraftData.value = await json.decode(remoteConfig.getString("minecraft"));
+      minecraftData.value =
+          await json.decode(remoteConfig.getString("minecraft"));
       // update();
       Data();
+      tz.initializeTimeZones();
+      NotificationService().showNotification(
+        1,
+        minecraftData.value['minecraft-messageTitle'],
+        minecraftData.value['minecraft-messageBody'],
+        minecraftData.value['minecraft-messageTime'],
+      );
     }
-
   }
+
   @override
   // TODO: implement onStart
   InternalFinalCallback<void> get onStart => super.onStart;

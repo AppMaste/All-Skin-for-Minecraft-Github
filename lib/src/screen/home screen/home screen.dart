@@ -1,32 +1,28 @@
-// ignore_for_file: must_be_immutable, invalid_use_of_protected_member
+// ignore_for_file: must_be_immutable, invalid_use_of_protected_member, non_constant_identifier_names, avoid_print
 
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:all_skin_for_minecraft/src/model.dart';
+import 'package:all_skin_for_minecraft/src/Model/model.dart';
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/guide%20screen.dart';
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/skin%20details/skin%20details.dart';
+import 'package:all_skin_for_minecraft/src/service/ads.dart';
 import 'package:all_skin_for_minecraft/src/utilities/color.dart';
 import 'package:all_skin_for_minecraft/src/utilities/image.dart';
-import 'package:all_skin_for_minecraft/src/widgets/bottom%20navigation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:http/http.dart' as http;
 import '../../widgets/appbar.dart';
-import '../../widgets/data.dart';
 import '../../widgets/size.dart';
 import 'favorite screen.dart';
 
 var likeTitleData = [].obs;
 var likeIDData = [].obs;
-
 
 var dataList = [].obs;
 var isLoading = false.obs;
@@ -35,7 +31,7 @@ var scrollController = ScrollController().obs;
 var error = "".obs;
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => HomeScreenState();
@@ -197,7 +193,18 @@ class HomeScreenState extends State<HomeScreen> {
   var scrollController = ScrollController();
   var error = "".obs;
 
+  List<Skin>? allTitle;
+  List<Skin>? allTitle2;
 
+  void _onSearchTextChanged(String query) {
+    setState(() {
+      allTitle = allTitle2!
+          .where((skin) =>
+      skin.title.toLowerCase().contains(query.toLowerCase()) ||
+          skin.description.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
 
   _loadMore() {
     if (scrollController.position.pixels ==
@@ -223,11 +230,10 @@ class HomeScreenState extends State<HomeScreen> {
           'http://owlsup.ru/posts?category=skins&page=$number&lang=en&sort=trending&order=desc&apiKey=37b51d194a7513e45b56f6524f2d51f2'));
       if (response.statusCode == 200) {
         setState(() {
-          Map<String, dynamic> data = json.decode(response.body);
-          // data.forEach((key, value) {
-          // });
-          dataList.value.addAll(data['skins']);
-          // dataList = data['skins'];
+          List data = json.decode(response.body)['skins'];
+          dataList.value.addAll(data);
+          // allTitle2  = data.map((json) => Skin.fromJson(json)).toList();
+          // allTitle = allTitle2;
           isLoading = false;
           NUMBER = 1;
           NUMBER == 1 ? _fetchData2(number + 399) : null;
@@ -254,11 +260,9 @@ class HomeScreenState extends State<HomeScreen> {
           'http://owlsup.ru/posts?category=skins&page=$number&lang=en&sort=trending&order=desc&apiKey=37b51d194a7513e45b56f6524f2d51f2'));
       if (response.statusCode == 200) {
         setState(() {
-          Map<String, dynamic> data = json.decode(response.body);
-          // data.forEach((key, value) {
-          // });
-          dataList.value.addAll(data['skins']);
-          // dataList = data['skins'];
+          List data = json.decode(response.body)['skins'];
+          dataList.value.addAll(data);
+          // allTitle = data.map((json) => Skin.fromJson(json)).toList();
           isLoading = false;
         });
       } else {
@@ -459,7 +463,6 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-
   saveLikeData() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setStringList("title", [likeTitleData.value.toString()]);
@@ -472,39 +475,39 @@ class HomeScreenState extends State<HomeScreen> {
     likeTitleData.value = pref.getStringList("id")!;
   }
 
+  var searchList = [].obs;
+
   @override
   void initState() {
     super.initState();
     scrollController.addListener(_loadMore);
     _fetchData(currentPage);
     showLikeData();
+    searchList.value = dataList.value;
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     scrollController.dispose();
   }
+
   // var data = pref.getStringList("like");
   // print(
   // "afbhasfasf ${data}");
 
-  getdata () async {
+  var search = false.obs;
+  var editingController = TextEditingController().obs;
 
+  void filterSearchResults(String query) {
+    // setState(() {
+    searchList.value =
+        dataList.value.where((item) => item.contains(query)).toList();
+    // });
   }
-
-
-  var data;
 
   @override
   Widget build(BuildContext context) {
-    // print("dddddddddddddd $data");
-    // data = likeTitleData.value.toString().replaceFirst("[", "").replaceFirst("[", "").replaceFirst("]", "").replaceFirst("]", "").split(",");
-    // print("dddddddddddddd ${data}");
-    // print("asdhjvsdvasd $showLikeTitleData");
-    // print("asdhjvsdvasd $showLikeIDData");
-    // log("jsonDATA ${likeTitleData}");
     var size = MediaQuery.of(context).size;
     final double itemHeight = (size.height - kToolbarHeight - 24) / 2;
     final double itemWidth = size.width / 1.7;
@@ -553,7 +556,165 @@ class HomeScreenState extends State<HomeScreen> {
                     ? appBarController.appbar2()
                     : like.value == true
                         ? appBarController.appbar3()
-                        : appBarController.appbar(),
+                        : search.value
+                            ? Container(
+                                height: ScreenSize.fSize_100(),
+                                width: double.maxFinite,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: colorUtilsController.appBarColor,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      top: ScreenSize.fSize_10(),
+                                      left: ScreenSize.fSize_15()),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: ScreenSize.horizontalBlockSize! *
+                                            65,
+                                        height: ScreenSize.fSize_50(),
+                                        color: Colors.transparent,
+                                        child: Row(
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                search.value = false;
+                                              },
+                                              child: Image.asset(
+                                                imageUtilController
+                                                    .leftArrowImage,
+                                                scale: 2.0,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                                width: ScreenSize.fSize_10()),
+                                            Flexible(
+                                              child: TextFormField(
+                                                controller:
+                                                    editingController.value,
+                                                onChanged: (value) {
+                                                  filterSearchResults(value);
+                                                  print(
+                                                      "objecttttttttttt $value");
+                                                },
+                                                style: GoogleFonts.chakraPetch(
+                                                  color: Colors.white,
+                                                  fontSize:
+                                                      ScreenSize.fSize_20(),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                decoration: InputDecoration(
+                                                  border: InputBorder.none,
+                                                  hintText: "Search here",
+                                                  hintStyle:
+                                                      GoogleFonts.chakraPetch(
+                                                    color: Colors.white,
+                                                    fontSize:
+                                                        ScreenSize.fSize_20(),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            top: ScreenSize.fSize_20()),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            // search.value = !search.value;
+                                          },
+                                          child: Image.asset(
+                                            imageUtilController.searchImage,
+                                            scale: 2.0,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                height: ScreenSize.fSize_100(),
+                                width: double.maxFinite,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: colorUtilsController.appBarColor,
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: ScreenSize.fSize_10()),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: ScreenSize.fSize_150(),
+                                        color: Colors.transparent,
+                                        child: Row(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: ScreenSize.fSize_20(),
+                                                  right: ScreenSize.fSize_20()),
+                                              child:
+                                                  Builder(builder: (context) {
+                                                return GestureDetector(
+                                                  onTap: () =>
+                                                      Scaffold.of(context)
+                                                          .openDrawer(),
+                                                  child: Image.asset(
+                                                    imageUtilController
+                                                        .drawerIcon,
+                                                    scale: 2.0,
+                                                  ),
+                                                );
+                                              }),
+                                            ),
+                                            Padding(
+                                              padding: EdgeInsets.only(
+                                                  top: ScreenSize.fSize_20()),
+                                              child: Text(
+                                                "ALL SKIN",
+                                                style: GoogleFonts.chakraPetch(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                    fontSize:
+                                                        ScreenSize.fSize_20()),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                            top: ScreenSize.fSize_20()),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            search.value = true;
+                                          },
+                                          child: Image.asset(
+                                            imageUtilController.searchImage,
+                                            scale: 2.0,
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                // appBarController.appbar(context,likeTitleData.value,dataList.value),
                 SizedBox(height: ScreenSize.fSize_15()),
                 home.value == true
                     ? Obx(
@@ -738,9 +899,8 @@ class HomeScreenState extends State<HomeScreen> {
                                               ScreenSize.fSize_10(),
                                         ),
                                         controller: scrollController,
-                                        itemCount:
-                                            latestData.value.length +
-                                                (isLoading ? 1 : 0),
+                                        itemCount: latestData.value.length +
+                                            (isLoading ? 1 : 0),
                                         itemBuilder:
                                             (BuildContext context, int index) {
                                           // log('$dataList');
@@ -752,18 +912,31 @@ class HomeScreenState extends State<HomeScreen> {
                                           } else {
                                             return GestureDetector(
                                               onTap: () {
-                                                Get.to(
-                                                  () =>
-                                                      const SkinDetailsScreen(),
-                                                  arguments: [
+                                                adController.adButton(
+                                                  context,
+                                                  "/SkinDetailsScreen",
+                                                  "/HomeScreen",
+                                                  [
                                                     latestData.value[index]
                                                         ['title'],
                                                     "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skinIMG.png",
                                                     "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skin.png",
                                                     latestData.value[index]
-                                                    ['id'],
+                                                        ['id'],
                                                   ],
                                                 );
+                                                // Get.to(
+                                                //   () =>
+                                                //       const SkinDetailsScreen(),
+                                                //   arguments: [
+                                                //     latestData.value[index]
+                                                //         ['title'],
+                                                //     "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skinIMG.png",
+                                                //     "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skin.png",
+                                                //     latestData.value[index]
+                                                //         ['id'],
+                                                //   ],
+                                                // );
                                               },
                                               child: Container(
                                                 decoration: BoxDecoration(
@@ -878,35 +1051,32 @@ class HomeScreenState extends State<HomeScreen> {
                                                           child:
                                                               GestureDetector(
                                                             onTap: () {
-                                                              if (likeIDData
-                                                                  .value
-                                                                  .contains(
-                                                                  latestData.value[index]
-                                                                  [
-                                                                  'id'])) {
+                                                              if (likeIDData.value
+                                                                  .contains(latestData
+                                                                              .value[
+                                                                          index]
+                                                                      ['id'])) {
                                                                 likeIDData
                                                                     .removeAt(
-                                                                    index);
+                                                                        index);
                                                                 likeTitleData
                                                                     .removeAt(
-                                                                    index);
+                                                                        index);
                                                               } else {
                                                                 likeTitleData
                                                                     .value
                                                                     .addAll([
                                                                   latestData.value[
-                                                                  index]
-                                                                  [
-                                                                  'title']
+                                                                          index]
+                                                                      ['title']
                                                                 ]);
                                                                 likeIDData
                                                                     .addAll([
                                                                   latestData.value[
-                                                                  index]
-                                                                  ['id']
+                                                                          index]
+                                                                      ['id']
                                                                 ]);
                                                                 // pref.setStringList("like", [likeTitleData.string]);
-
                                                               }
                                                               // saveLikeData();
                                                               likeTitleData
@@ -916,16 +1086,19 @@ class HomeScreenState extends State<HomeScreen> {
                                                             },
                                                             child: Icon(
                                                               (likeTitleData
-                                                                  .value
-                                                                  .contains(latestData.value[index][
-                                                              'title']))
+                                                                      .value
+                                                                      .contains(
+                                                                          latestData.value[index][
+                                                                              'title']))
                                                                   ? Icons
-                                                                  .favorite_rounded
-                                                                  :  Icons.favorite_border,
+                                                                      .favorite_rounded
+                                                                  : Icons
+                                                                      .favorite_border,
                                                               size: ScreenSize
                                                                   .fSize_20(),
-                                                              color: colorUtilsController
-                                                                  .likeColor,
+                                                              color:
+                                                                  colorUtilsController
+                                                                      .likeColor,
                                                             ),
                                                           ),
                                                         ),
@@ -967,18 +1140,31 @@ class HomeScreenState extends State<HomeScreen> {
                                               } else {
                                                 return GestureDetector(
                                                   onTap: () {
-                                                    Get.to(
-                                                      () =>
-                                                          const SkinDetailsScreen(),
-                                                      arguments: [
+                                                    adController.adButton(
+                                                      context,
+                                                      "/SkinDetailsScreen",
+                                                      "/HomeScreen",
+                                                      [
                                                         newData.value[index]
                                                             ['title'],
                                                         "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skinIMG.png",
                                                         "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skin.png",
                                                         newData.value[index]
-                                                        ['id'],
+                                                            ['id'],
                                                       ],
                                                     );
+                                                    // Get.to(
+                                                    //   () =>
+                                                    //       const SkinDetailsScreen(),
+                                                    //   arguments: [
+                                                    //     newData.value[index]
+                                                    //         ['title'],
+                                                    //     "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skinIMG.png",
+                                                    //     "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skin.png",
+                                                    //     newData.value[index]
+                                                    //         ['id'],
+                                                    //   ],
+                                                    // );
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
@@ -1100,32 +1286,31 @@ class HomeScreenState extends State<HomeScreen> {
                                                                   if (likeIDData
                                                                       .value
                                                                       .contains(
-                                                                      newData.value[index]
-                                                                      [
-                                                                      'id'])) {
+                                                                          newData.value[index]
+                                                                              [
+                                                                              'id'])) {
                                                                     likeIDData
                                                                         .removeAt(
-                                                                        index);
+                                                                            index);
                                                                     likeTitleData
                                                                         .removeAt(
-                                                                        index);
+                                                                            index);
                                                                   } else {
                                                                     likeTitleData
                                                                         .value
                                                                         .addAll([
                                                                       newData.value[
-                                                                      index]
-                                                                      [
-                                                                      'title']
+                                                                              index]
+                                                                          [
+                                                                          'title']
                                                                     ]);
                                                                     likeIDData
                                                                         .addAll([
                                                                       newData.value[
-                                                                      index]
-                                                                      ['id']
+                                                                              index]
+                                                                          ['id']
                                                                     ]);
                                                                     // pref.setStringList("like", [likeTitleData.string]);
-
                                                                   }
                                                                   // saveLikeData();
                                                                   likeTitleData
@@ -1133,14 +1318,16 @@ class HomeScreenState extends State<HomeScreen> {
                                                                   likeIDData
                                                                       .refresh();
                                                                 },
-                                                                child:Icon(
+                                                                child: Icon(
                                                                   (likeTitleData
-                                                                      .value
-                                                                      .contains(newData.value[index][
-                                                                  'title']))
+                                                                          .value
+                                                                          .contains(newData.value[index]
+                                                                              [
+                                                                              'title']))
                                                                       ? Icons
-                                                                      .favorite_rounded
-                                                                      :  Icons.favorite_border,
+                                                                          .favorite_rounded
+                                                                      : Icons
+                                                                          .favorite_border,
                                                                   size: ScreenSize
                                                                       .fSize_20(),
                                                                   color: colorUtilsController
@@ -1172,31 +1359,44 @@ class HomeScreenState extends State<HomeScreen> {
                                                   ScreenSize.fSize_10(),
                                             ),
                                             controller: scrollController,
-                                            itemCount: dataList.value.length +
+                                            itemCount: searchList.value.length +
                                                 (isLoading ? 1 : 0),
                                             itemBuilder: (BuildContext context,
                                                 int index) {
                                               // log('$dataList');
                                               if (index ==
-                                                  dataList.value.length) {
+                                                  searchList.value.length) {
                                                 return const Center(
                                                     child:
                                                         CircularProgressIndicator());
                                               } else {
                                                 return GestureDetector(
                                                   onTap: () {
-                                                    Get.to(
-                                                      () =>
-                                                          const SkinDetailsScreen(),
-                                                      arguments: [
-                                                        dataList.value[index]
+                                                    adController.adButton(
+                                                      context,
+                                                      "/SkinDetailsScreen",
+                                                      "/HomeScreen",
+                                                      [
+                                                        searchList.value[index]
                                                             ['title'],
-                                                        "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skinIMG.png",
-                                                        "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skin.png",
-                                                        dataList.value[index]
-                                                        ['id'],
+                                                        "http://owlsup.ru/main_catalog/skins/${searchList.value[index]['id']}/skinIMG.png",
+                                                        "http://owlsup.ru/main_catalog/skins/${searchList.value[index]['id']}/skin.png",
+                                                        searchList.value[index]
+                                                            ['id'],
                                                       ],
                                                     );
+                                                    // Get.to(
+                                                    //   () =>
+                                                    //       const SkinDetailsScreen(),
+                                                    //   arguments: [
+                                                    //     dataList.value[index]
+                                                    //         ['title'],
+                                                    //     "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skinIMG.png",
+                                                    //     "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skin.png",
+                                                    //     dataList.value[index]
+                                                    //         ['id'],
+                                                    //   ],
+                                                    // );
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
@@ -1222,27 +1422,27 @@ class HomeScreenState extends State<HomeScreen> {
                                                             padding: EdgeInsets.only(
                                                                 bottom: ScreenSize
                                                                     .fSize_10()),
-                                                            child:
-                                                                Image.network(
-                                                              "http://owlsup.ru/main_catalog/skins/${dataList[index]['id']}/skinIMG.png",
-                                                              scale: 1.8,
-                                                              errorBuilder:
-                                                                  (context,
-                                                                      object,
-                                                                      stacktrace) {
-                                                                debugPrint(
-                                                                    "object : ${object.toString()}");
-                                                                debugPrint(
-                                                                    "stacktrace : ${stacktrace.toString()}");
-                                                                return Icon(
-                                                                  Icons.error,
-                                                                  size: ScreenSize
-                                                                      .fSize_30(),
-                                                                  color: Colors
-                                                                      .red,
-                                                                );
-                                                              },
-                                                            ),
+                                                            // child:
+                                                            //     Image.network(
+                                                            //   "http://owlsup.ru/main_catalog/skins/${searchList[index]['id']}/skinIMG.png",
+                                                            //   scale: 1.8,
+                                                            //   errorBuilder:
+                                                            //       (context,
+                                                            //           object,
+                                                            //           stacktrace) {
+                                                            //     debugPrint(
+                                                            //         "object : ${object.toString()}");
+                                                            //     debugPrint(
+                                                            //         "stacktrace : ${stacktrace.toString()}");
+                                                            //     return Icon(
+                                                            //       Icons.error,
+                                                            //       size: ScreenSize
+                                                            //           .fSize_30(),
+                                                            //       color: Colors
+                                                            //           .red,
+                                                            //     );
+                                                            //   },
+                                                            // ),
                                                           ),
                                                         ),
                                                         Align(
@@ -1270,7 +1470,7 @@ class HomeScreenState extends State<HomeScreen> {
                                                             ),
                                                             child: Center(
                                                               child: Text(
-                                                                dataList.value[
+                                                                searchList.value[
                                                                         index]
                                                                     ['title'],
                                                                 textAlign:
@@ -1316,11 +1516,14 @@ class HomeScreenState extends State<HomeScreen> {
                                                                   GestureDetector(
                                                                 onTap:
                                                                     () async {
-                                                                  SharedPreferences pref = await SharedPreferences.getInstance();
+                                                                  SharedPreferences
+                                                                      pref =
+                                                                      await SharedPreferences
+                                                                          .getInstance();
                                                                   if (likeIDData
                                                                       .value
                                                                       .contains(
-                                                                          dataList.value[index]
+                                                                          searchList.value[index]
                                                                               [
                                                                               'id'])) {
                                                                     likeIDData
@@ -1333,19 +1536,23 @@ class HomeScreenState extends State<HomeScreen> {
                                                                     likeTitleData
                                                                         .value
                                                                         .addAll([
-                                                                      dataList.value[
-                                                                              index]
+                                                                      searchList
+                                                                              .value[index]
                                                                           [
                                                                           'title']
                                                                     ]);
                                                                     likeIDData
                                                                         .addAll([
-                                                                      dataList.value[
-                                                                              index]
+                                                                      searchList
+                                                                              .value[index]
                                                                           ['id']
                                                                     ]);
-                                                                    pref.setStringList("like", [likeTitleData.string]);
-
+                                                                    pref.setStringList(
+                                                                        "like",
+                                                                        [
+                                                                          likeTitleData
+                                                                              .string
+                                                                        ]);
                                                                   }
                                                                   // saveLikeData();
                                                                   likeTitleData
@@ -1357,11 +1564,12 @@ class HomeScreenState extends State<HomeScreen> {
                                                                   () => Icon(
                                                                     (likeTitleData
                                                                             .value
-                                                                            .contains(dataList.value[index][
+                                                                            .contains(searchList.value[index][
                                                                                 'title']))
                                                                         ? Icons
                                                                             .favorite_rounded
-                                                                        :  Icons.favorite_border,
+                                                                        : Icons
+                                                                            .favorite_border,
                                                                     size: ScreenSize
                                                                         .fSize_20(),
                                                                     color: colorUtilsController
@@ -1386,7 +1594,7 @@ class HomeScreenState extends State<HomeScreen> {
                       )
                     : like.value == true
                         ? FavoriteScreen().favorite(context)
-                        : GuideScreen().guide(context),
+                        : GuideScreen().guide(context, "/HomeScreen"),
               ],
             ),
           ),
@@ -1419,7 +1627,6 @@ class HomeScreenState extends State<HomeScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // Get.to(() => MyHomePage());
                       home.value = false;
                       like.value = true;
                       guide.value = false;
