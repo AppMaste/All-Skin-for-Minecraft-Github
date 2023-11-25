@@ -2,10 +2,7 @@
 
 import 'dart:convert';
 import 'dart:developer';
-
-import 'package:all_skin_for_minecraft/src/Model/model.dart';
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/guide%20screen.dart';
-import 'package:all_skin_for_minecraft/src/screen/home%20screen/skin%20details/skin%20details.dart';
 import 'package:all_skin_for_minecraft/src/service/ads.dart';
 import 'package:all_skin_for_minecraft/src/utilities/color.dart';
 import 'package:all_skin_for_minecraft/src/utilities/image.dart';
@@ -23,12 +20,6 @@ import 'favorite screen.dart';
 
 var likeTitleData = [].obs;
 var likeIDData = [].obs;
-
-var dataList = [].obs;
-var isLoading = false.obs;
-var currentPage = 1.obs;
-var scrollController = ScrollController().obs;
-var error = "".obs;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -182,29 +173,28 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  var image = [].obs;
-  int NUMBER = 0;
+  // data load list
   var dataList = [].obs;
   var latestData = [].obs;
   var newData = [].obs;
   var mostUsedData = [].obs;
-  var isLoading = false;
+
+  // data search list
+  var dataSearchList = [].obs;
+  var latestDataSearchList = [].obs;
+  var newDataSearchList = [].obs;
+  var mostUsedDataSearchList = [].obs;
+
+  int NUMBER = 0;
   var currentPage = 1;
-  var scrollController = ScrollController();
+
   var error = "".obs;
 
-  List<Skin>? allTitle;
-  List<Skin>? allTitle2;
+  var isLoading = false;
+  var search = false.obs;
 
-  void _onSearchTextChanged(String query) {
-    setState(() {
-      allTitle = allTitle2!
-          .where((skin) =>
-      skin.title.toLowerCase().contains(query.toLowerCase()) ||
-          skin.description.toLowerCase().contains(query.toLowerCase()))
-          .toList();
-    });
-  }
+  var scrollController = ScrollController();
+  var editingController = TextEditingController().obs;
 
   _loadMore() {
     if (scrollController.position.pixels ==
@@ -230,10 +220,9 @@ class HomeScreenState extends State<HomeScreen> {
           'http://owlsup.ru/posts?category=skins&page=$number&lang=en&sort=trending&order=desc&apiKey=37b51d194a7513e45b56f6524f2d51f2'));
       if (response.statusCode == 200) {
         setState(() {
-          List data = json.decode(response.body)['skins'];
-          dataList.value.addAll(data);
-          // allTitle2  = data.map((json) => Skin.fromJson(json)).toList();
-          // allTitle = allTitle2;
+          Map<String, dynamic> data = json.decode(response.body);
+          dataList.value.addAll(data['skins']);
+          dataSearchList.value = dataList.value;
           isLoading = false;
           NUMBER = 1;
           NUMBER == 1 ? _fetchData2(number + 399) : null;
@@ -260,9 +249,9 @@ class HomeScreenState extends State<HomeScreen> {
           'http://owlsup.ru/posts?category=skins&page=$number&lang=en&sort=trending&order=desc&apiKey=37b51d194a7513e45b56f6524f2d51f2'));
       if (response.statusCode == 200) {
         setState(() {
-          List data = json.decode(response.body)['skins'];
-          dataList.value.addAll(data);
-          // allTitle = data.map((json) => Skin.fromJson(json)).toList();
+          Map<String, dynamic> data = json.decode(response.body);
+          dataList.value.addAll(data['skins']);
+          dataSearchList.value = dataList.value;
           isLoading = false;
         });
       } else {
@@ -290,10 +279,8 @@ class HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         setState(() {
           Map<String, dynamic> data = json.decode(response.body);
-          // data.forEach((key, value) {
-          // });
           latestData.value.addAll(data['skins']);
-          // dataList = data['skins'];
+          latestDataSearchList.value = latestData.value;
           isLoading = false;
           NUMBER = 1;
           NUMBER == 1 ? _fetchLatestData2(number + 399) : null;
@@ -323,10 +310,8 @@ class HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         setState(() {
           Map<String, dynamic> data = json.decode(response.body);
-          // data.forEach((key, value) {
-          // });
           latestData.value.addAll(data['skins']);
-          // dataList = data['skins'];
+          latestDataSearchList.value = latestData.value;
           isLoading = false;
         });
       } else {
@@ -354,10 +339,8 @@ class HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         setState(() {
           Map<String, dynamic> data = json.decode(response.body);
-          // data.forEach((key, value) {
-          // });
           newData.value.addAll(data['skins']);
-          // dataList = data['skins'];
+          newDataSearchList.value = newData.value;
           isLoading = false;
           NUMBER = 1;
           NUMBER == 1 ? _fetchNewData2(number + 399) : null;
@@ -387,10 +370,8 @@ class HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         setState(() {
           Map<String, dynamic> data = json.decode(response.body);
-          // data.forEach((key, value) {
-          // });
           newData.value.addAll(data['skins']);
-          // dataList = data['skins'];
+          newDataSearchList.value = newData.value;
           isLoading = false;
         });
       } else {
@@ -412,16 +393,13 @@ class HomeScreenState extends State<HomeScreen> {
       error.value = "";
     });
     try {
-      // print("fetchData ${latest.value}");
       final response = await http.get(Uri.parse(
           'http://owlsup.ru/posts?category=skins&page=$number&lang=en&sort=download&order=desc&apiKey=37b51d194a7513e45b56f6524f2d51f2'));
       if (response.statusCode == 200) {
         setState(() {
           Map<String, dynamic> data = json.decode(response.body);
-          // data.forEach((key, value) {
-          // });
           mostUsedData.value.addAll(data['skins']);
-          // dataList = data['skins'];
+          mostUsedDataSearchList.value = mostUsedData.value;
           isLoading = false;
           NUMBER = 1;
           NUMBER == 1 ? _fetchMostUsedData2(number + 399) : null;
@@ -450,6 +428,7 @@ class HomeScreenState extends State<HomeScreen> {
         setState(() {
           Map<String, dynamic> data = json.decode(response.body);
           mostUsedData.value.addAll(data['skins']);
+          mostUsedDataSearchList.value = mostUsedData.value;
           isLoading = false;
         });
       } else {
@@ -463,19 +442,17 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  saveLikeData() async {
+  saveLikeData(var id, var title) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setStringList("title", [likeTitleData.value.toString()]);
-    pref.setStringList("id", [likeIDData.value.toString()]);
+    pref.setStringList("title", [title]);
+    pref.setStringList("id", [id]);
   }
 
   showLikeData() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    likeTitleData.value = pref.getStringList("title")!;
-    likeTitleData.value = pref.getStringList("id")!;
+    likeTitleData.value.addAll(pref.getStringList("title")!);
+    likeIDData.value.addAll(pref.getStringList("id")!);
   }
-
-  var searchList = [].obs;
 
   @override
   void initState() {
@@ -483,7 +460,6 @@ class HomeScreenState extends State<HomeScreen> {
     scrollController.addListener(_loadMore);
     _fetchData(currentPage);
     showLikeData();
-    searchList.value = dataList.value;
   }
 
   @override
@@ -492,18 +468,39 @@ class HomeScreenState extends State<HomeScreen> {
     scrollController.dispose();
   }
 
-  // var data = pref.getStringList("like");
-  // print(
-  // "afbhasfasf ${data}");
+  void dataSearchResults(String query) {
+    // _fetchData(currentPage);
+    setState(() {
+      dataSearchList.value = dataList.value
+          .where((item) => item['title'].contains(query))
+          .toList();
+    });
+  }
 
-  var search = false.obs;
-  var editingController = TextEditingController().obs;
+  void latestSearchResults(String query) {
+    // _fetchData(currentPage);
+    setState(() {
+      latestDataSearchList.value = latestData.value
+          .where((item) => item['title'].contains(query))
+          .toList();
+    });
+  }
 
-  void filterSearchResults(String query) {
-    // setState(() {
-    searchList.value =
-        dataList.value.where((item) => item.contains(query)).toList();
-    // });
+  void newSearchResults(String query) {
+    // _fetchData(currentPage);
+    setState(() {
+      newDataSearchList.value =
+          newData.value.where((item) => item['title'].contains(query)).toList();
+    });
+  }
+
+  void mostUsedSearchResults(String query) {
+    // _fetchData(currentPage);
+    setState(() {
+      mostUsedDataSearchList.value = mostUsedData.value
+          .where((item) => item['title'].contains(query))
+          .toList();
+    });
   }
 
   @override
@@ -584,6 +581,8 @@ class HomeScreenState extends State<HomeScreen> {
                                           children: [
                                             GestureDetector(
                                               onTap: () {
+                                                editingController.value.clear();
+                                                _fetchData(currentPage);
                                                 search.value = false;
                                               },
                                               child: Image.asset(
@@ -598,10 +597,11 @@ class HomeScreenState extends State<HomeScreen> {
                                               child: TextFormField(
                                                 controller:
                                                     editingController.value,
-                                                onChanged: (value) {
-                                                  filterSearchResults(value);
-                                                  print(
-                                                      "objecttttttttttt $value");
+                                                onFieldSubmitted: (value) {
+                                                  dataSearchResults(value);
+                                                  latestSearchResults(value);
+                                                  newSearchResults(value);
+                                                  mostUsedSearchResults(value);
                                                 },
                                                 style: GoogleFonts.chakraPetch(
                                                   color: Colors.white,
@@ -715,11 +715,13 @@ class HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                 // appBarController.appbar(context,likeTitleData.value,dataList.value),
-                SizedBox(height: ScreenSize.fSize_15()),
+                // SizedBox(height: ScreenSize.fSize_15()),
                 home.value == true
                     ? Obx(
                         () => Column(
                           children: [
+                            minecraftBannerAD.getBanner("/HomeScreen"),
+                            SizedBox(height: ScreenSize.fSize_15()),
                             Container(
                               height: height,
                               width: ScreenSize.horizontalBlockSize! * 92,
@@ -899,13 +901,15 @@ class HomeScreenState extends State<HomeScreen> {
                                               ScreenSize.fSize_10(),
                                         ),
                                         controller: scrollController,
-                                        itemCount: latestData.value.length +
-                                            (isLoading ? 1 : 0),
+                                        itemCount:
+                                            latestDataSearchList.value.length +
+                                                (isLoading ? 1 : 0),
                                         itemBuilder:
                                             (BuildContext context, int index) {
                                           // log('$dataList');
                                           if (index ==
-                                              latestData.value.length) {
+                                              latestDataSearchList
+                                                  .value.length) {
                                             return const Center(
                                                 child:
                                                     CircularProgressIndicator());
@@ -917,26 +921,14 @@ class HomeScreenState extends State<HomeScreen> {
                                                   "/SkinDetailsScreen",
                                                   "/HomeScreen",
                                                   [
-                                                    latestData.value[index]
-                                                        ['title'],
-                                                    "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skinIMG.png",
-                                                    "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skin.png",
-                                                    latestData.value[index]
-                                                        ['id'],
+                                                    latestDataSearchList
+                                                        .value[index]['title'],
+                                                    "http://owlsup.ru/main_catalog/skins/${latestDataSearchList.value[index]['id']}/skinIMG.png",
+                                                    "http://owlsup.ru/main_catalog/skins/${latestDataSearchList.value[index]['id']}/skin.png",
+                                                    latestDataSearchList
+                                                        .value[index]['id'],
                                                   ],
                                                 );
-                                                // Get.to(
-                                                //   () =>
-                                                //       const SkinDetailsScreen(),
-                                                //   arguments: [
-                                                //     latestData.value[index]
-                                                //         ['title'],
-                                                //     "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skinIMG.png",
-                                                //     "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skin.png",
-                                                //     latestData.value[index]
-                                                //         ['id'],
-                                                //   ],
-                                                // );
                                               },
                                               child: Container(
                                                 decoration: BoxDecoration(
@@ -961,7 +953,7 @@ class HomeScreenState extends State<HomeScreen> {
                                                             bottom: ScreenSize
                                                                 .fSize_10()),
                                                         child: Image.network(
-                                                          "http://owlsup.ru/main_catalog/skins/${latestData.value[index]['id']}/skinIMG.png",
+                                                          "http://owlsup.ru/main_catalog/skins/${latestDataSearchList.value[index]['id']}/skinIMG.png",
                                                           scale: 1.8,
                                                           errorBuilder:
                                                               (context, object,
@@ -1007,7 +999,8 @@ class HomeScreenState extends State<HomeScreen> {
                                                         ),
                                                         child: Center(
                                                           child: Text(
-                                                            latestData.value[
+                                                            latestDataSearchList
+                                                                    .value[
                                                                 index]['title'],
                                                             textAlign: TextAlign
                                                                 .center,
@@ -1051,34 +1044,39 @@ class HomeScreenState extends State<HomeScreen> {
                                                           child:
                                                               GestureDetector(
                                                             onTap: () {
-                                                              if (likeIDData.value
-                                                                  .contains(latestData
+                                                              if (likeIDData.value.contains(
+                                                                  latestDataSearchList
                                                                               .value[
                                                                           index]
                                                                       ['id'])) {
-                                                                likeIDData
-                                                                    .removeAt(
-                                                                        index);
-                                                                likeTitleData
-                                                                    .removeAt(
-                                                                        index);
+                                                                // likeIDData
+                                                                //     .removeAt(
+                                                                //         index);
+                                                                // likeTitleData
+                                                                //     .removeAt(
+                                                                //         index);
                                                               } else {
                                                                 likeTitleData
                                                                     .value
                                                                     .addAll([
-                                                                  latestData.value[
+                                                                  latestDataSearchList
+                                                                              .value[
                                                                           index]
                                                                       ['title']
                                                                 ]);
                                                                 likeIDData
                                                                     .addAll([
-                                                                  latestData.value[
-                                                                          index]
-                                                                      ['id']
+                                                                  latestDataSearchList
+                                                                          .value[
+                                                                      index]['id']
                                                                 ]);
                                                                 // pref.setStringList("like", [likeTitleData.string]);
                                                               }
-                                                              // saveLikeData();
+                                                              saveLikeData(latestDataSearchList
+                                                                  .value[
+                                                              index]['id'],latestDataSearchList
+                                                                  .value[
+                                                              index]['title']);
                                                               likeTitleData
                                                                   .refresh();
                                                               likeIDData
@@ -1088,7 +1086,7 @@ class HomeScreenState extends State<HomeScreen> {
                                                               (likeTitleData
                                                                       .value
                                                                       .contains(
-                                                                          latestData.value[index][
+                                                                          latestDataSearchList.value[index][
                                                                               'title']))
                                                                   ? Icons
                                                                       .favorite_rounded
@@ -1127,13 +1125,15 @@ class HomeScreenState extends State<HomeScreen> {
                                                   ScreenSize.fSize_10(),
                                             ),
                                             controller: scrollController,
-                                            itemCount: newData.value.length +
-                                                (isLoading ? 1 : 0),
+                                            itemCount:
+                                                newDataSearchList.value.length +
+                                                    (isLoading ? 1 : 0),
                                             itemBuilder: (BuildContext context,
                                                 int index) {
                                               // log('$dataList');
                                               if (index ==
-                                                  newData.value.length) {
+                                                  newDataSearchList
+                                                      .value.length) {
                                                 return const Center(
                                                     child:
                                                         CircularProgressIndicator());
@@ -1145,26 +1145,15 @@ class HomeScreenState extends State<HomeScreen> {
                                                       "/SkinDetailsScreen",
                                                       "/HomeScreen",
                                                       [
-                                                        newData.value[index]
+                                                        newDataSearchList
+                                                                .value[index]
                                                             ['title'],
-                                                        "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skinIMG.png",
-                                                        "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skin.png",
-                                                        newData.value[index]
-                                                            ['id'],
+                                                        "http://owlsup.ru/main_catalog/skins/${newDataSearchList.value[index]['id']}/skinIMG.png",
+                                                        "http://owlsup.ru/main_catalog/skins/${newDataSearchList.value[index]['id']}/skin.png",
+                                                        newDataSearchList
+                                                            .value[index]['id'],
                                                       ],
                                                     );
-                                                    // Get.to(
-                                                    //   () =>
-                                                    //       const SkinDetailsScreen(),
-                                                    //   arguments: [
-                                                    //     newData.value[index]
-                                                    //         ['title'],
-                                                    //     "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skinIMG.png",
-                                                    //     "http://owlsup.ru/main_catalog/skins/${newData.value[index]['id']}/skin.png",
-                                                    //     newData.value[index]
-                                                    //         ['id'],
-                                                    //   ],
-                                                    // );
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
@@ -1192,7 +1181,7 @@ class HomeScreenState extends State<HomeScreen> {
                                                                     .fSize_10()),
                                                             child:
                                                                 Image.network(
-                                                              "http://owlsup.ru/main_catalog/skins/${newData[index]['id']}/skinIMG.png",
+                                                              "http://owlsup.ru/main_catalog/skins/${newDataSearchList[index]['id']}/skinIMG.png",
                                                               scale: 1.8,
                                                               errorBuilder:
                                                                   (context,
@@ -1238,7 +1227,8 @@ class HomeScreenState extends State<HomeScreen> {
                                                             ),
                                                             child: Center(
                                                               child: Text(
-                                                                newData.value[
+                                                                newDataSearchList
+                                                                            .value[
                                                                         index]
                                                                     ['title'],
                                                                 textAlign:
@@ -1286,33 +1276,34 @@ class HomeScreenState extends State<HomeScreen> {
                                                                   if (likeIDData
                                                                       .value
                                                                       .contains(
-                                                                          newData.value[index]
+                                                                          newDataSearchList.value[index]
                                                                               [
                                                                               'id'])) {
-                                                                    likeIDData
-                                                                        .removeAt(
-                                                                            index);
-                                                                    likeTitleData
-                                                                        .removeAt(
-                                                                            index);
                                                                   } else {
                                                                     likeTitleData
                                                                         .value
                                                                         .addAll([
-                                                                      newData.value[
-                                                                              index]
+                                                                      newDataSearchList
+                                                                              .value[index]
                                                                           [
                                                                           'title']
                                                                     ]);
                                                                     likeIDData
                                                                         .addAll([
-                                                                      newData.value[
-                                                                              index]
+                                                                      newDataSearchList
+                                                                              .value[index]
                                                                           ['id']
                                                                     ]);
-                                                                    // pref.setStringList("like", [likeTitleData.string]);
-                                                                  }
-                                                                  // saveLikeData();
+                                                                    }
+                                                                  saveLikeData(
+                                                                      newDataSearchList
+                                                                              .value[index]
+                                                                          [
+                                                                          'id'],
+                                                                      newDataSearchList
+                                                                              .value[index]
+                                                                          [
+                                                                          'title']);
                                                                   likeTitleData
                                                                       .refresh();
                                                                   likeIDData
@@ -1321,7 +1312,7 @@ class HomeScreenState extends State<HomeScreen> {
                                                                 child: Icon(
                                                                   (likeTitleData
                                                                           .value
-                                                                          .contains(newData.value[index]
+                                                                          .contains(newDataSearchList.value[index]
                                                                               [
                                                                               'title']))
                                                                       ? Icons
@@ -1359,13 +1350,13 @@ class HomeScreenState extends State<HomeScreen> {
                                                   ScreenSize.fSize_10(),
                                             ),
                                             controller: scrollController,
-                                            itemCount: searchList.value.length +
-                                                (isLoading ? 1 : 0),
+                                            itemCount:
+                                                dataSearchList.value.length +
+                                                    (isLoading ? 1 : 0),
                                             itemBuilder: (BuildContext context,
                                                 int index) {
-                                              // log('$dataList');
                                               if (index ==
-                                                  searchList.value.length) {
+                                                  dataSearchList.value.length) {
                                                 return const Center(
                                                     child:
                                                         CircularProgressIndicator());
@@ -1377,26 +1368,15 @@ class HomeScreenState extends State<HomeScreen> {
                                                       "/SkinDetailsScreen",
                                                       "/HomeScreen",
                                                       [
-                                                        searchList.value[index]
+                                                        dataSearchList
+                                                                .value[index]
                                                             ['title'],
-                                                        "http://owlsup.ru/main_catalog/skins/${searchList.value[index]['id']}/skinIMG.png",
-                                                        "http://owlsup.ru/main_catalog/skins/${searchList.value[index]['id']}/skin.png",
-                                                        searchList.value[index]
-                                                            ['id'],
+                                                        "http://owlsup.ru/main_catalog/skins/${dataSearchList.value[index]['id']}/skinIMG.png",
+                                                        "http://owlsup.ru/main_catalog/skins/${dataSearchList.value[index]['id']}/skin.png",
+                                                        dataSearchList
+                                                            .value[index]['id'],
                                                       ],
                                                     );
-                                                    // Get.to(
-                                                    //   () =>
-                                                    //       const SkinDetailsScreen(),
-                                                    //   arguments: [
-                                                    //     dataList.value[index]
-                                                    //         ['title'],
-                                                    //     "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skinIMG.png",
-                                                    //     "http://owlsup.ru/main_catalog/skins/${dataList.value[index]['id']}/skin.png",
-                                                    //     dataList.value[index]
-                                                    //         ['id'],
-                                                    //   ],
-                                                    // );
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
@@ -1422,27 +1402,27 @@ class HomeScreenState extends State<HomeScreen> {
                                                             padding: EdgeInsets.only(
                                                                 bottom: ScreenSize
                                                                     .fSize_10()),
-                                                            // child:
-                                                            //     Image.network(
-                                                            //   "http://owlsup.ru/main_catalog/skins/${searchList[index]['id']}/skinIMG.png",
-                                                            //   scale: 1.8,
-                                                            //   errorBuilder:
-                                                            //       (context,
-                                                            //           object,
-                                                            //           stacktrace) {
-                                                            //     debugPrint(
-                                                            //         "object : ${object.toString()}");
-                                                            //     debugPrint(
-                                                            //         "stacktrace : ${stacktrace.toString()}");
-                                                            //     return Icon(
-                                                            //       Icons.error,
-                                                            //       size: ScreenSize
-                                                            //           .fSize_30(),
-                                                            //       color: Colors
-                                                            //           .red,
-                                                            //     );
-                                                            //   },
-                                                            // ),
+                                                            child:
+                                                                Image.network(
+                                                              "http://owlsup.ru/main_catalog/skins/${dataSearchList[index]['id']}/skinIMG.png",
+                                                              scale: 1.8,
+                                                              errorBuilder:
+                                                                  (context,
+                                                                      object,
+                                                                      stacktrace) {
+                                                                debugPrint(
+                                                                    "object : ${object.toString()}");
+                                                                debugPrint(
+                                                                    "stacktrace : ${stacktrace.toString()}");
+                                                                return Icon(
+                                                                  Icons.error,
+                                                                  size: ScreenSize
+                                                                      .fSize_30(),
+                                                                  color: Colors
+                                                                      .red,
+                                                                );
+                                                              },
+                                                            ),
                                                           ),
                                                         ),
                                                         Align(
@@ -1470,7 +1450,8 @@ class HomeScreenState extends State<HomeScreen> {
                                                             ),
                                                             child: Center(
                                                               child: Text(
-                                                                searchList.value[
+                                                                dataSearchList
+                                                                            .value[
                                                                         index]
                                                                     ['title'],
                                                                 textAlign:
@@ -1514,47 +1495,38 @@ class HomeScreenState extends State<HomeScreen> {
                                                               ),
                                                               child:
                                                                   GestureDetector(
-                                                                onTap:
-                                                                    () async {
-                                                                  SharedPreferences
-                                                                      pref =
-                                                                      await SharedPreferences
-                                                                          .getInstance();
+                                                                onTap: () {
                                                                   if (likeIDData
                                                                       .value
                                                                       .contains(
-                                                                          searchList.value[index]
+                                                                          dataSearchList.value[index]
                                                                               [
                                                                               'id'])) {
-                                                                    likeIDData
-                                                                        .removeAt(
-                                                                            index);
-                                                                    likeTitleData
-                                                                        .removeAt(
-                                                                            index);
                                                                   } else {
                                                                     likeTitleData
                                                                         .value
                                                                         .addAll([
-                                                                      searchList
+                                                                      dataSearchList
                                                                               .value[index]
                                                                           [
                                                                           'title']
                                                                     ]);
                                                                     likeIDData
                                                                         .addAll([
-                                                                      searchList
+                                                                      dataSearchList
                                                                               .value[index]
                                                                           ['id']
                                                                     ]);
-                                                                    pref.setStringList(
-                                                                        "like",
-                                                                        [
-                                                                          likeTitleData
-                                                                              .string
-                                                                        ]);
                                                                   }
-                                                                  // saveLikeData();
+                                                                  saveLikeData(
+                                                                      dataSearchList
+                                                                              .value[index]
+                                                                          [
+                                                                          'id'],
+                                                                      dataSearchList
+                                                                              .value[index]
+                                                                          [
+                                                                          'title']);
                                                                   likeTitleData
                                                                       .refresh();
                                                                   likeIDData
@@ -1564,7 +1536,7 @@ class HomeScreenState extends State<HomeScreen> {
                                                                   () => Icon(
                                                                     (likeTitleData
                                                                             .value
-                                                                            .contains(searchList.value[index][
+                                                                            .contains(dataSearchList.value[index][
                                                                                 'title']))
                                                                         ? Icons
                                                                             .favorite_rounded

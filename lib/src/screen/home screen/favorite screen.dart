@@ -2,6 +2,7 @@
 
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/home%20screen.dart';
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/skin%20details/skin%20details.dart';
+import 'package:all_skin_for_minecraft/src/service/ads.dart';
 import 'package:all_skin_for_minecraft/src/utilities/image.dart';
 import 'package:all_skin_for_minecraft/src/widgets/size.dart';
 import 'package:flutter/material.dart';
@@ -35,22 +36,24 @@ class FavoriteScreen {
                 // controller: scrollController,
                 itemCount: likeTitleData.value.length,
                 itemBuilder: (BuildContext context, int index) {
-                  // log('$dataList');
-                  // if (index ==
-                  //     latestData.value.length) {
-                  //   return const Center(
-                  //       child:
-                  //       CircularProgressIndicator());
-                  // } else {
                   return GestureDetector(
                     onTap: () {
-                      Get.to(
-                        () => const SkinDetailsScreen(),
-                        arguments: [
+                      adController.adButton(
+                        context,
+                        "/SkinDetailsScreen",
+                        "/HomeScreen",
+                        [
                           likeIDData.value[index],
                           likeTitleData.value[index],
                         ],
                       );
+                      // Get.to(
+                      //   () => const SkinDetailsScreen(),
+                      //   arguments: [
+                      //     likeIDData.value[index],
+                      //     likeTitleData.value[index],
+                      //   ],
+                      // );
                     },
                     child: Container(
                       decoration: BoxDecoration(
