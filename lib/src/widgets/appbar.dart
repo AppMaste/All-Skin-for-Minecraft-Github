@@ -1,3 +1,4 @@
+import 'package:all_skin_for_minecraft/src/service/ads.dart';
 import 'package:all_skin_for_minecraft/src/widgets/bottom%20navigation.dart';
 import 'package:all_skin_for_minecraft/src/widgets/drawer.dart';
 import 'package:all_skin_for_minecraft/src/widgets/size.dart';
@@ -15,14 +16,16 @@ AppBarController appBarController = Get.put(AppBarController());
 class AppBarController extends GetxController {
   var search = false.obs;
   var editingController = TextEditingController().obs;
-  appbar(BuildContext context,var likeList,var mainList) {
+
+  appbar(BuildContext context, var likeList, var mainList) {
     void filterSearchResults(String query) {
       // setState(() {
       likeList = mainList
-            .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+          .where((item) => item.toLowerCase().contains(query.toLowerCase()))
+          .toList();
       // });
     }
+
     return search.value
         ? Container(
             height: ScreenSize.fSize_100(),
@@ -338,6 +341,12 @@ class AppBarController extends GetxController {
               "Privacy Policy",
               () {
                 Get.back();
+                adController.adButton(
+                  context,
+                  "/WebviewScreen",
+                  "/HomePage",
+                  "",
+                );
               },
             ),
             drawerController.drawerRow(

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/home%20screen.dart';
 import 'package:all_skin_for_minecraft/src/screen/home%20screen/skin%20details/skin%20details.dart';
 import 'package:all_skin_for_minecraft/src/screen/splash%20screens/splash%20screen.dart';
+import 'package:all_skin_for_minecraft/src/screen/webview/Webview%20Screen.dart';
 import 'package:all_skin_for_minecraft/src/service/notification%20service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -95,6 +96,7 @@ Future<void> main() async {
         '/': (context) => SplashScreen(),
         '/HomeScreen': (context) => const HomeScreen(),
         '/SkinDetailsScreen': (context) => const SkinDetailsScreen(),
+        '/WebviewScreen': (context) =>  const WebviewScreen(),
       },
     ),
   );

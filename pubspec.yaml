@@ -46,11 +46,14 @@ dependencies:
   flutter_local_notifications: ^13.0.0
 
 
+
+
   get: ^4.6.5
 
   google_fonts: ^4.0.4
   simple_gradient_text: ^1.2.4
   gradient_borders: ^1.0.0
+  flutter_inappwebview: ^5.8.0
 
   http: ^0.13.6
   archive: ^3.1.2
